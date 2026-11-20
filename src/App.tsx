@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -7,17 +8,15 @@ const GITHUB = 'https://github.com/marufHtuhin';
 const LINKEDIN = 'https://www.linkedin.com/in/marufhtuhin';
 const LEETCODE = 'https://leetcode.com/u/marufHtuhin';
 
-const ROTATING = [
-  'CSE student · BUBT, Dhaka',
-  'Python · FastAPI · Django',
-  'MySQL · PostgreSQL · Docker',
-];
+const TYPE_PHRASES = ['Maruf Hasan', 'a Backend Developer', 'a Python Developer'];
 
 const NAV = [
   { id: 'about', label: 'About' },
-  { id: 'journey', label: 'Journey' },
+  { id: 'experience', label: 'Experience' },
   { id: 'projects', label: 'Projects' },
-  { id: 'open-source', label: 'Open source' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'services', label: 'Services' },
+  { id: 'journey', label: 'Journey' },
   { id: 'contact', label: 'Contact' },
 ];
 
@@ -32,6 +31,11 @@ type Project = {
   stack: string[];
   live?: string;
   repo: string;
+  /* flip-card fields (grid projects only) */
+  category?: string;
+  short?: string;
+  built?: string[];
+  ai?: boolean;
 };
 
 const FARM_MARKET: Project = {
@@ -63,6 +67,7 @@ const FARM_MARKET: Project = {
   ],
   live: 'https://farmmarket-gdcm.onrender.com',
   repo: 'https://github.com/marufHtuhin/FarmMarket',
+  ai: true,
 };
 
 const AMADER_KRISHI: Project = {
@@ -72,6 +77,10 @@ const AMADER_KRISHI: Project = {
   desc: 'Bengali agriculture assistant — chat with Gemini in Bangla, photograph a crop to check for disease, and hear answers spoken aloud. My SDP-II project.',
   stack: ['FastAPI', 'MySQL', 'Google Gemini', 'Web Speech API'],
   repo: 'https://github.com/marufHtuhin/AmaderKrishi_AI',
+  category: 'AI · Python',
+  short: 'Bengali agriculture assistant — Gemini chat, crop-disease image analysis, voice.',
+  built: ['Gemini chat in Bangla', 'Crop-disease detection from photos', 'Spoken answers via Web Speech API'],
+  ai: true,
 };
 
 const ECOMMERCE: Project = {
@@ -81,6 +90,14 @@ const ECOMMERCE: Project = {
   desc: 'Full-stack point-of-sale and inventory system: JWT auth, product and stock CRUD, sales and invoices with automatic stock deduction, VAT and discounts, dashboard stats, and printable invoices. Built for a database course.',
   stack: ['FastAPI', 'SQLAlchemy', 'MySQL', 'SQLite', 'JWT'],
   repo: 'https://github.com/marufHtuhin/Ecommerce-Sales-Inventory-System',
+  category: 'Full-stack · POS',
+  short: 'Point-of-sale and inventory system with JWT auth and printable invoices.',
+  built: [
+    'JWT auth + product and stock CRUD',
+    'Sales & invoices with automatic stock deduction',
+    'VAT, discounts, printable invoices',
+  ],
+  ai: false,
 };
 
 const SNAKE: Project = {
@@ -92,10 +109,23 @@ const SNAKE: Project = {
   stack: ['Python', 'Pygame', 'A* pathfinding'],
   live: 'https://marufhtuhin.github.io/Snake-Game-AI/',
   repo: 'https://github.com/marufHtuhin/Snake-Game-AI',
+  category: 'Game · AI',
+  short: 'Classic snake with an A* pathfinding brain — watch the AI play, or play yourself.',
+  built: ['A* pathfinding autopilot', 'Manual play — keyboard + touch', 'Runs in the browser via pygbag'],
+  ai: false,
 };
 
-const PROJECTS_LEFT = [FARM_MARKET, ECOMMERCE];
-const PROJECTS_RIGHT = [AMADER_KRISHI, SNAKE];
+/* Featured card (always visible) + flip-card grid below the filters. */
+const FLIP_PROJECTS = [AMADER_KRISHI, ECOMMERCE, SNAKE];
+const ALL_PROJECTS = [FARM_MARKET, ...FLIP_PROJECTS];
+
+type Filter = 'all' | 'live' | 'ai';
+
+const FILTERS: { id: Filter; label: string; count: number }[] = [
+  { id: 'all', label: 'All', count: ALL_PROJECTS.length },
+  { id: 'live', label: 'Live demo', count: ALL_PROJECTS.filter((p) => p.live).length },
+  { id: 'ai', label: 'AI-powered', count: ALL_PROJECTS.filter((p) => p.ai).length },
+];
 
 const REPOS = [
   {
@@ -123,15 +153,6 @@ const REPOS = [
     desc: 'My LeetCode solutions — 300+ problems solved.',
     url: 'https://github.com/marufHtuhin/LeetCode',
   },
-];
-
-const BUILD_ITEMS = [
-  { title: 'Design', desc: 'REST APIs, data models' },
-  { title: 'Build', desc: 'FastAPI & Django' },
-  { title: 'Store', desc: 'MySQL & PostgreSQL' },
-  { title: 'Deploy', desc: 'Render, Vercel, Docker' },
-  { title: 'Test', desc: 'Postman' },
-  { title: 'Learn', desc: 'LeetCode, daily practice' },
 ];
 
 const JOURNEY = [
@@ -169,7 +190,85 @@ const JOURNEY = [
   },
 ];
 
-/* ---------- tiny inline icons (line style, no emoji, no photos) ---------- */
+const CORE_STACK = ['Python', 'FastAPI', 'Django', 'MySQL', 'PostgreSQL', 'React', 'Docker'];
+
+const SKILL_GROUPS = [
+  { title: 'Backend', glyph: 'BE', items: ['FastAPI', 'Django', 'REST APIs', 'JWT auth'] },
+  { title: 'Languages', glyph: 'PY', items: ['Python', 'TypeScript', 'JavaScript', 'SQL', 'C++'] },
+  { title: 'Data', glyph: 'DB', items: ['MySQL', 'PostgreSQL', 'SQLite', 'SQLAlchemy', 'Alembic'] },
+  { title: 'AI & ML', glyph: 'AI', items: ['Google Gemini', 'scikit-learn', 'RAG-lite', 'Open-Meteo'] },
+  { title: 'Tools', glyph: 'TL', items: ['Git & GitHub', 'Docker', 'Postman', 'pytest', 'Vitest'] },
+  { title: 'Deploy', glyph: 'CD', items: ['Render', 'Vercel', 'TiDB Cloud'] },
+];
+
+/* Honest labels only — no paid jobs yet, so every entry says what it is. */
+const EXPERIENCE = [
+  {
+    dates: 'Nov 2026',
+    title: 'FarmMarket',
+    org: 'Team Agronexis · International AI Builders Congress 2026',
+    label: 'Hackathon',
+    bullets: [
+      'Bilingual fair-price marketplace — React + TypeScript frontend, FastAPI + MySQL/TiDB backend',
+      'Smart demand matching, 8-week price forecasting, Gemini-powered Krishi Bondhu assistant',
+    ],
+  },
+  {
+    dates: 'Nov 2026',
+    title: 'Snake Game AI',
+    org: 'Personal project',
+    label: 'Personal project',
+    bullets: [
+      'A* pathfinding AI that plays snake by itself',
+      'Python + Pygame, playable in the browser via pygbag',
+    ],
+  },
+  {
+    dates: '2026',
+    title: 'AmaderKrishi AI',
+    org: 'SDP-II · BUBT',
+    label: 'Academic project',
+    bullets: [
+      'Bengali agriculture assistant — Gemini chat, crop-disease detection from photos',
+      'Spoken answers via the Web Speech API',
+    ],
+  },
+  {
+    dates: '2025 — 2026',
+    title: 'E-commerce Sales & Inventory System',
+    org: 'Database course · BUBT',
+    label: 'Course project',
+    bullets: [
+      'Full-stack POS + inventory — JWT auth, product and stock CRUD',
+      'Sales and invoices with automatic stock deduction, VAT and discounts',
+    ],
+  },
+];
+
+const SERVICES = [
+  {
+    title: 'REST API Development',
+    desc: 'FastAPI and Django APIs with JWT auth, validation, and clean, documented endpoints.',
+    tags: ['FastAPI', 'Django', 'JWT'],
+  },
+  {
+    title: 'Database Design',
+    desc: 'MySQL and PostgreSQL schemas, SQLAlchemy models, and Alembic migrations that keep data safe.',
+    tags: ['MySQL', 'PostgreSQL', 'SQLAlchemy'],
+  },
+  {
+    title: 'Full-Stack Web Apps',
+    desc: 'React + TypeScript frontends on FastAPI backends, deployed on Render and Vercel.',
+    tags: ['React', 'TypeScript', 'Render'],
+  },
+  {
+    title: 'AI Features',
+    desc: 'Gemini chat and vision, RAG-lite retrieval over your own notes, and scikit-learn forecasting.',
+    tags: ['Gemini', 'scikit-learn', 'RAG-lite'],
+  },
+];
+
+/* ---------- tiny inline icons (line style, no emoji) ---------- */
 
 function MailIcon() {
   return (
@@ -263,55 +362,211 @@ function DownloadIcon() {
   );
 }
 
-/* Curved arrow pointing up at the "short version" card. */
-function CurveArrow() {
+function CheckIcon() {
   return (
-    <svg width="46" height="52" viewBox="0 0 46 52" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M6 48 C 10 30, 22 16, 38 8" />
-      <path d="M30 8 L 39 6 L 38 16" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="m8 12.5 2.5 2.5L16 9.5" />
     </svg>
   );
 }
 
-/* ---------- project card ---------- */
-
-function ProjectCard({ project, tilt }: { project: Project; tilt: 'tilt-l' | 'tilt-r' }) {
+function FlipIcon() {
   return (
-    <article className={`proj-card ${tilt}`}>
-      {project.annotation && (
-        <span className="proj-anno">
-          {project.liveDot && <span className="red-dot" aria-hidden="true" />}
-          {project.annotation}
-        </span>
-      )}
-      <a className="proj-shot-link" href={project.live ?? project.repo} target="_blank" rel="noreferrer" aria-label={`${project.title} — open ${project.live ? 'live site' : 'repo'}`}>
-        <img className="proj-shot" src={project.shot} alt={project.shotAlt} loading="lazy" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 12a9 9 0 1 1-2.6-6.3" />
+      <path d="M21 3v6h-6" />
+    </svg>
+  );
+}
+
+function PinIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function UpIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m18 15-6-6-6 6" />
+    </svg>
+  );
+}
+
+/* ---------- typewriter ---------- */
+
+/* Types each phrase char by char, pauses, deletes, loops forever. */
+function useTypewriter(phrases: string[]) {
+  const [text, setText] = useState('');
+  useEffect(() => {
+    let phrase = 0;
+    let char = 0;
+    let deleting = false;
+    let timer = 0;
+    const tick = () => {
+      const current = phrases[phrase];
+      if (!deleting) {
+        char += 1;
+        setText(current.slice(0, char));
+        if (char === current.length) {
+          deleting = true;
+          timer = window.setTimeout(tick, 1200);
+          return;
+        }
+        timer = window.setTimeout(tick, 70);
+      } else {
+        char -= 1;
+        setText(current.slice(0, char));
+        if (char === 0) {
+          deleting = false;
+          phrase = (phrase + 1) % phrases.length;
+          timer = window.setTimeout(tick, 350);
+          return;
+        }
+        timer = window.setTimeout(tick, 35);
+      }
+    };
+    timer = window.setTimeout(tick, 400);
+    return () => window.clearTimeout(timer);
+  }, [phrases]);
+  return text;
+}
+
+/* ---------- featured project card (FarmMarket — no flip) ---------- */
+
+function FeaturedCard({ project }: { project: Project }) {
+  return (
+    <article className="proj-featured">
+      <a
+        className="featured-shot"
+        href={project.live ?? project.repo}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`${project.title} — open ${project.live ? 'live site' : 'repo'}`}
+      >
+        <img className="featured-img" src={project.shot} alt={project.shotAlt} loading="lazy" />
       </a>
-      <h3>{project.title}</h3>
-      <p>{project.desc}</p>
-      {project.feats && (
-        <ul className="proj-feats">
-          {project.feats.map((f) => (
-            <li key={f}>{f}</li>
-          ))}
-        </ul>
-      )}
-      <div className="pills">
-        {project.stack.map((s) => (
-          <span className="pill" key={s}>
-            {s}
+      <div className="featured-body">
+        {project.annotation && (
+          <span className="featured-live">
+            {project.liveDot && <span className="red-dot" aria-hidden="true" />}
+            {project.annotation}
           </span>
-        ))}
-      </div>
-      <div className="proj-links">
-        {project.live && (
-          <a className="text-link" href={project.live} target="_blank" rel="noreferrer">
-            Live site <ArrowIcon />
-          </a>
         )}
-        <a className="text-link" href={project.repo} target="_blank" rel="noreferrer">
-          Repo <ArrowIcon />
-        </a>
+        <h3>{project.title}</h3>
+        <p>{project.desc}</p>
+        {project.feats && (
+          <ul className="proj-feats">
+            {project.feats.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+        )}
+        <div className="pills">
+          {project.stack.map((s) => (
+            <span className="pill" key={s}>
+              {s}
+            </span>
+          ))}
+        </div>
+        <div className="proj-links">
+          {project.live && (
+            <a className="text-link" href={project.live} target="_blank" rel="noreferrer">
+              Live site <ArrowIcon />
+            </a>
+          )}
+          <a className="text-link" href={project.repo} target="_blank" rel="noreferrer">
+            Repo <ArrowIcon />
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ---------- flip card (click to flip; hover never flips) ---------- */
+
+function FlipCard({ project }: { project: Project }) {
+  const [flipped, setFlipped] = useState(false);
+  const link = project.live ?? project.repo;
+  const linkLabel = project.live ? 'Live site' : 'Repo';
+
+  /* Clicks on links inside the card navigate instead of flipping. */
+  const flipOnClick = (e: ReactMouseEvent<HTMLElement>) => {
+    if ((e.target as HTMLElement).closest('a')) return;
+    setFlipped((f) => !f);
+  };
+  const flipOnKey = (e: ReactKeyboardEvent<HTMLElement>) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    if ((e.target as HTMLElement).closest('a')) return;
+    e.preventDefault();
+    setFlipped((f) => !f);
+  };
+
+  return (
+    <article
+      className={`flip-card${flipped ? ' flipped' : ''}`}
+      onClick={flipOnClick}
+      onKeyDown={flipOnKey}
+      tabIndex={0}
+      role="button"
+      aria-pressed={flipped}
+      aria-label={`${project.title} — ${flipped ? 'show front' : 'show what I built'}`}
+    >
+      <div className="flip-inner">
+        {/* front */}
+        <div className="flip-face flip-front">
+          <div className="flip-shot-wrap">
+            <img className="flip-shot" src={project.shot} alt={project.shotAlt} loading="lazy" />
+            <span className="flip-cat">{project.category}</span>
+            <span className="flip-icon" aria-hidden="true">
+              <FlipIcon />
+            </span>
+          </div>
+          <div className="flip-body">
+            <h3>{project.title}</h3>
+            <p>{project.short}</p>
+            <div className="pills">
+              {project.stack.map((s) => (
+                <span className="pill" key={s}>
+                  {s}
+                </span>
+              ))}
+            </div>
+            <div className="flip-foot">
+              <span>Click for details</span>
+              <a className="text-link" href={link} target="_blank" rel="noreferrer">
+                {linkLabel} <ArrowIcon />
+              </a>
+            </div>
+          </div>
+        </div>
+        {/* back */}
+        <div className="flip-face flip-back">
+          <div className="flip-body">
+            <h3>{project.title}</h3>
+            <span className="flip-cat flip-cat-back">{project.category}</span>
+            <div className="eyebrow flip-eyebrow">What I built</div>
+            <ul className="flip-built">
+              {(project.built ?? []).map((b) => (
+                <li key={b}>
+                  <CheckIcon />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flip-foot">
+              <span>Click to flip back</span>
+              <a className="btn flip-btn" href={link} target="_blank" rel="noreferrer">
+                {linkLabel} <ArrowIcon />
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -329,9 +584,12 @@ function readInitialTheme(): Theme {
 export default function App() {
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
   const [progress, setProgress] = useState(0);
+  const [showTop, setShowTop] = useState(false);
   const [active, setActive] = useState('');
-  const [rot, setRot] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [copiedContact, setCopiedContact] = useState(false);
+  const [filter, setFilter] = useState<Filter>('all');
+  const typed = useTypewriter(TYPE_PHRASES);
 
   // Theme: persist + apply to <html>.
   useEffect(() => {
@@ -343,12 +601,13 @@ export default function App() {
     }
   }, [theme]);
 
-  // Scroll progress bar.
+  // Scroll progress bar + back-to-top visibility.
   useEffect(() => {
     const onScroll = () => {
       const el = document.documentElement;
       const max = el.scrollHeight - el.clientHeight;
       setProgress(max > 0 ? (el.scrollTop / max) * 100 : 0);
+      setShowTop(el.scrollTop > 600);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -372,13 +631,29 @@ export default function App() {
     return () => obs.disconnect();
   }, []);
 
-  // Rotating mono line in the hero.
+  // Scroll-reveal: fade + rise as sections enter the viewport.
   useEffect(() => {
-    const t = setInterval(() => setRot((r) => (r + 1) % ROTATING.length), 3200);
-    return () => clearInterval(t);
+    const els = document.querySelectorAll('.reveal');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      els.forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            obs.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
   }, []);
 
-  const copyEmail = async () => {
+  const copyEmail = async (contact: boolean) => {
     try {
       await navigator.clipboard.writeText(EMAIL);
     } catch {
@@ -389,9 +664,20 @@ export default function App() {
       document.execCommand('copy');
       document.body.removeChild(ta);
     }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
+    if (contact) {
+      setCopiedContact(true);
+      window.setTimeout(() => setCopiedContact(false), 2000);
+    } else {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    }
   };
+
+  const visibleFlip = FLIP_PROJECTS.filter((p) => {
+    if (filter === 'live') return Boolean(p.live);
+    if (filter === 'ai') return Boolean(p.ai);
+    return true;
+  });
 
   return (
     <>
@@ -431,17 +717,16 @@ export default function App() {
             <div>
               <div className="hero-greet-row">
                 <span className="hero-greet">hi, I&rsquo;m Maruf</span>
-                <span className="hero-rot">
-                  / <span className="rot-line" key={rot}>{ROTATING[rot]}</span>
-                </span>
               </div>
-              <h1>
-                I build <span className="hl">backend</span>
-                <br />
-                systems that
-                <br />
-                actually run.
+              <h1 aria-label="Maruf Hasan, a Backend Developer, a Python Developer">
+                <span aria-hidden="true">
+                  {typed}
+                  <span className="type-caret">|</span>
+                </span>
               </h1>
+              <p className="hero-sub">
+                I build <span className="hl">backend</span> systems that actually run.
+              </p>
               <p className="hero-lede">
                 I&rsquo;m a CSE student in Dhaka building APIs, databases and the unglamorous
                 parts that make an app run — mostly <strong>Python</strong>, with{' '}
@@ -449,10 +734,13 @@ export default function App() {
                 <strong>FarmMarket</strong>, a fair-price marketplace for Bangladeshi farmers.
               </p>
               <div className="hero-actions">
-                <a className="btn" href={`mailto:${EMAIL}`}>
-                  <MailIcon /> Email me
+                <a className="btn" href="#projects">
+                  View Projects
                 </a>
-                <button className="email-pill" type="button" onClick={copyEmail}>
+                <a className="btn" href="/cv.pdf" download>
+                  <DownloadIcon /> Download CV
+                </a>
+                <button className="email-pill" type="button" onClick={() => copyEmail(false)}>
                   {EMAIL} {copied ? <span className="copied">Copied</span> : <CopyIcon />}
                 </button>
               </div>
@@ -470,41 +758,14 @@ export default function App() {
             </div>
 
             <div>
-              <aside className="short-card" aria-label="The short version">
-                <span className="tape" aria-hidden="true" />
-                <h2>the short version</h2>
-                <div className="sv-row">
-                  <span className="sv-label">Now</span>
-                  <span className="sv-value">
-                    CSE student, BUBT
-                    <span>3rd year · CGPA 3.70</span>
-                  </span>
+              <div className="photo-frame">
+                <span className="photo-backdrop" aria-hidden="true" />
+                <span className="photo-dots" aria-hidden="true" />
+                <img src="/photo.jpg" alt="Maruf Hasan — backend developer in Dhaka" />
+                <div className="photo-badge">
+                  <b>Backend</b>
+                  <span>Python · FastAPI · Django</span>
                 </div>
-                <div className="sv-row">
-                  <span className="sv-label">Building</span>
-                  <span className="sv-value">
-                    FarmMarket
-                    <span>Hackathon project · Team Agronexis</span>
-                  </span>
-                </div>
-                <div className="sv-row">
-                  <span className="sv-label">Daily stack</span>
-                  <span className="sv-value">
-                    Python, FastAPI, Django
-                    <span>MySQL, PostgreSQL, Docker</span>
-                  </span>
-                </div>
-                <div className="sv-row">
-                  <span className="sv-label">Also</span>
-                  <span className="sv-value">
-                    300+ LeetCode problems
-                    <span>Django certificate · Interactive Cares</span>
-                  </span>
-                </div>
-              </aside>
-              <div className="skim" aria-hidden="true">
-                <CurveArrow />
-                <span className="hand">skim this if you&rsquo;re in a hurry</span>
               </div>
             </div>
           </div>
@@ -513,7 +774,7 @@ export default function App() {
         {/* ---------- about ---------- */}
         <section className="section" id="about">
           <div className="wrap">
-            <div className="section-head">
+            <div className="section-head reveal">
               <h2>
                 Learning backend by <span className="hl">building</span> it.
               </h2>
@@ -523,7 +784,7 @@ export default function App() {
                 CGPA 3.70
               </span>
             </div>
-            <div className="about-grid">
+            <div className="about-grid reveal">
               <div className="about-text">
                 <p>
                   I&rsquo;m a CSE student in Dhaka, and backend is where I live: APIs,
@@ -537,19 +798,25 @@ export default function App() {
                   by shipping: every project here is real, runnable code, and I keep my
                   problem-solving sharp with <strong>300+ LeetCode problems</strong>.
                 </p>
-              </div>
-              <div className="build-card">
-                <span className="tape" aria-hidden="true" />
-                <h3>how I build, day to day</h3>
-                <div className="build-grid">
-                  {BUILD_ITEMS.map((item) => (
-                    <div className="build-item" key={item.title}>
-                      <b>{item.title}</b>
-                      <span>{item.desc}</span>
-                    </div>
-                  ))}
+                <div className="about-stats">
+                  <div className="about-stat">
+                    <b>4</b>
+                    <span>Projects built</span>
+                  </div>
+                  <div className="about-stat">
+                    <b>300+</b>
+                    <span>LeetCode problems</span>
+                  </div>
+                  <div className="about-stat">
+                    <b>3.70</b>
+                    <span>CGPA</span>
+                  </div>
                 </div>
               </div>
+              <figure className="about-photo">
+                <span className="tape" aria-hidden="true" />
+                <img src="/photo-full.jpg" alt="Maruf Hasan, full portrait" />
+              </figure>
             </div>
             <div className="cert-line">
               <span className="hand">certification</span>
@@ -560,10 +827,177 @@ export default function App() {
           </div>
         </section>
 
+        {/* ---------- experience ---------- */}
+        <section className="section" id="experience">
+          <div className="wrap">
+            <div className="section-head reveal">
+              <div>
+                <div className="eyebrow">projects &amp; hackathons</div>
+                <h2>
+                  Experience <span className="hl">so far</span>.
+                </h2>
+              </div>
+              <span className="section-note">
+                no jobs yet —
+                <br />
+                real work, honestly labelled
+              </span>
+            </div>
+            <div className="xp-timeline reveal">
+              {EXPERIENCE.map((entry, i) => (
+                <div className={`xp-item${i % 2 === 0 ? ' xp-left' : ' xp-right'}`} key={entry.title}>
+                  <span className="xp-dot" aria-hidden="true" />
+                  <article className="xp-card">
+                    <div className="xp-date">{entry.dates}</div>
+                    <h3>
+                      {entry.title}
+                      <span className="label-pill">{entry.label}</span>
+                    </h3>
+                    <div className="tl-org">{entry.org}</div>
+                    <ul className="xp-bullets">
+                      {entry.bullets.map((b) => (
+                        <li key={b}>{b}</li>
+                      ))}
+                    </ul>
+                  </article>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- projects ---------- */}
+        <section className="section" id="projects">
+          <div className="wrap">
+            <div className="section-head reveal">
+              <div>
+                <div className="eyebrow">4 selected</div>
+                <h2>
+                  Four projects. All real, all <span className="hl">runnable</span>.
+                </h2>
+              </div>
+              <span className="section-note">
+                two live, four open source
+                <br />
+                all on GitHub
+              </span>
+            </div>
+            <FeaturedCard project={FARM_MARKET} />
+            <div className="filter-row" role="group" aria-label="Filter projects">
+              {FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className={`filter-btn${filter === f.id ? ' active' : ''}`}
+                  aria-pressed={filter === f.id}
+                  onClick={() => setFilter(f.id)}
+                >
+                  {f.label} <span className="count">{f.count}</span>
+                </button>
+              ))}
+            </div>
+            <div className="flip-grid">
+              {visibleFlip.map((p) => (
+                <FlipCard key={p.title} project={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- skills ---------- */}
+        <section className="section" id="skills">
+          <div className="wrap">
+            <div className="section-head reveal">
+              <div>
+                <div className="eyebrow">the toolkit</div>
+                <h2>
+                  Skills, grouped by <span className="hl">job</span>.
+                </h2>
+              </div>
+              <span className="section-note">
+                what I work with
+                <br />
+                every day
+              </span>
+            </div>
+            <div className="core-stack reveal">
+              {CORE_STACK.map((s) => (
+                <span className="core-pill" key={s}>
+                  {s}
+                </span>
+              ))}
+            </div>
+            <div className="skills-grid reveal">
+              {SKILL_GROUPS.map((group) => (
+                <div className="skill-card" key={group.title}>
+                  <div className="skill-top">
+                    <span className="skill-icon" aria-hidden="true">
+                      {group.glyph}
+                    </span>
+                    <h3>{group.title}</h3>
+                  </div>
+                  <div className="skill-count">{group.items.length} skills</div>
+                  <div className="skill-div" aria-hidden="true" />
+                  <div className="pills">
+                    {group.items.map((item) => (
+                      <span className="pill" key={item}>
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- services ---------- */}
+        <section className="section" id="services">
+          <div className="wrap">
+            <div className="section-head reveal">
+              <div>
+                <div className="eyebrow">services</div>
+                <h2>
+                  What I can <span className="hl">build</span>.
+                </h2>
+              </div>
+              <span className="section-note">
+                for your next
+                <br />
+                project
+              </span>
+            </div>
+            <p className="services-intro reveal">
+              I&rsquo;m open to entry-level roles and internships. Here&rsquo;s what I can
+              build for your team, based on the stack I use day to day.
+            </p>
+            <div className="services-grid reveal">
+              {SERVICES.map((service) => (
+                <article className="service-card" key={service.title}>
+                  <h3>{service.title}</h3>
+                  <p>{service.desc}</p>
+                  <div className="pills">
+                    {service.tags.map((t) => (
+                      <span className="pill" key={t}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="services-cta">
+              <a className="btn" href="#contact">
+                Let&rsquo;s talk
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* ---------- journey ---------- */}
         <section className="section" id="journey">
           <div className="wrap">
-            <div className="section-head">
+            <div className="section-head reveal">
               <h2>
                 From Rajshahi to building for <span className="hl">farmers</span>.
               </h2>
@@ -573,7 +1007,7 @@ export default function App() {
                 Rajshahi → Dhaka
               </span>
             </div>
-            <div className="timeline">
+            <div className="timeline reveal">
               {JOURNEY.map((entry) => (
                 <div className="tl-item" key={entry.title}>
                   <span className="tl-date">{entry.dates}</span>
@@ -595,41 +1029,10 @@ export default function App() {
           </div>
         </section>
 
-        {/* ---------- projects ---------- */}
-        <section className="section" id="projects">
-          <div className="wrap">
-            <div className="section-head">
-              <div>
-                <div className="eyebrow">4 selected</div>
-                <h2>
-                  Four projects. All real, all <span className="hl">runnable</span>.
-                </h2>
-              </div>
-              <span className="section-note">
-                two live, four open source
-                <br />
-                all on GitHub
-              </span>
-            </div>
-            <div className="projects-grid">
-              <div className="proj-col">
-                {PROJECTS_LEFT.map((p, i) => (
-                  <ProjectCard key={p.title} project={p} tilt={i % 2 === 0 ? 'tilt-l' : 'tilt-r'} />
-                ))}
-              </div>
-              <div className="proj-col second">
-                {PROJECTS_RIGHT.map((p, i) => (
-                  <ProjectCard key={p.title} project={p} tilt={i % 2 === 0 ? 'tilt-r' : 'tilt-l'} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* ---------- open source band ---------- */}
         <section className="band" id="open-source">
           <div className="wrap">
-            <div className="section-head">
+            <div className="section-head reveal">
               <div>
                 <div className="eyebrow">5 public repos</div>
                 <h2>Code in the open.</h2>
@@ -640,7 +1043,7 @@ export default function App() {
                 on GitHub
               </span>
             </div>
-            <div className="repo-list">
+            <div className="repo-list reveal">
               {REPOS.map((repo) => (
                 <a className="repo-row" key={repo.name} href={repo.url} target="_blank" rel="noreferrer">
                   <span className="repo-name">{repo.name}</span>
@@ -658,54 +1061,91 @@ export default function App() {
         {/* ---------- contact ---------- */}
         <section className="section" id="contact">
           <div className="wrap">
-            <div className="section-head">
-              <h2>
-                Looking for an entry-level <span className="hl">backend</span> role?
-              </h2>
+            <div className="section-head reveal">
+              <div>
+                <div className="eyebrow">contact</div>
+                <h2>
+                  Let&rsquo;s <span className="hl">talk</span>.
+                </h2>
+              </div>
+              <span className="section-note">
+                I read everything
+                <br />
+                that arrives
+              </span>
             </div>
-            <a className="contact-email" href={`mailto:${EMAIL}`}>
-              {EMAIL}
-            </a>
-            <div className="contact-sub">open to entry-level roles &amp; internships · Dhaka or remote</div>
-            <p className="contact-intro">
-              I read everything that arrives — roles, internships, collaborations, or just a
-              question about one of the projects above.
-            </p>
-            <div className="contact-actions">
-              <a className="btn" href="/cv.pdf" download>
-                <DownloadIcon /> Download CV
-              </a>
-            </div>
-            <div className="contact-grid">
-              <div className="contact-cell">
-                <div className="c-label">
-                  <MailIcon /> Email
-                </div>
-                <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-              </div>
-              <div className="contact-cell">
-                <div className="c-label">
-                  <LinkedInIcon /> LinkedIn
-                </div>
-                <a href={LINKEDIN} target="_blank" rel="noreferrer">
-                  linkedin.com/in/marufhtuhin
+            <div className="contact-grid2 reveal">
+              <div className="contact-navy">
+                <span className="avail-pill">Available for new opportunities</span>
+                <h3>Have a role or a project in mind?</h3>
+                <p>
+                  I&rsquo;m open to entry-level backend roles and internships. Email is the
+                  fastest way to reach me.
+                </p>
+                <p className="contact-loc">
+                  <PinIcon /> Dhaka, Bangladesh
+                </p>
+                <a className="btn btn-light" href={LINKEDIN} target="_blank" rel="noreferrer">
+                  Message me on LinkedIn <ArrowIcon />
                 </a>
               </div>
-              <div className="contact-cell">
-                <div className="c-label">
-                  <BranchIcon /> GitHub
+              <div className="contact-rows">
+                <div className="contact-row">
+                  <span className="contact-row-icon" aria-hidden="true">
+                    <MailIcon />
+                  </span>
+                  <div className="contact-row-body">
+                    <div className="contact-row-label">Email</div>
+                    <a className="contact-row-value" href={`mailto:${EMAIL}`}>
+                      {EMAIL}
+                    </a>
+                  </div>
+                  <button className="contact-row-btn" type="button" onClick={() => copyEmail(true)}>
+                    {copiedContact ? 'Copied' : 'Copy'}
+                  </button>
                 </div>
-                <a href={GITHUB} target="_blank" rel="noreferrer">
-                  github.com/marufHtuhin
-                </a>
-              </div>
-              <div className="contact-cell">
-                <div className="c-label">
-                  <CodeIcon /> LeetCode
+                <div className="contact-row">
+                  <span className="contact-row-icon" aria-hidden="true">
+                    <LinkedInIcon />
+                  </span>
+                  <div className="contact-row-body">
+                    <div className="contact-row-label">LinkedIn</div>
+                    <a className="contact-row-value" href={LINKEDIN} target="_blank" rel="noreferrer">
+                      linkedin.com/in/marufhtuhin
+                    </a>
+                  </div>
+                  <a className="contact-row-btn" href={LINKEDIN} target="_blank" rel="noreferrer">
+                    Open <ArrowIcon />
+                  </a>
                 </div>
-                <a href={LEETCODE} target="_blank" rel="noreferrer">
-                  leetcode.com/u/marufHtuhin
-                </a>
+                <div className="contact-row">
+                  <span className="contact-row-icon" aria-hidden="true">
+                    <BranchIcon />
+                  </span>
+                  <div className="contact-row-body">
+                    <div className="contact-row-label">GitHub</div>
+                    <a className="contact-row-value" href={GITHUB} target="_blank" rel="noreferrer">
+                      github.com/marufHtuhin
+                    </a>
+                  </div>
+                  <a className="contact-row-btn" href={GITHUB} target="_blank" rel="noreferrer">
+                    Open <ArrowIcon />
+                  </a>
+                </div>
+                <div className="contact-row">
+                  <span className="contact-row-icon" aria-hidden="true">
+                    <CodeIcon />
+                  </span>
+                  <div className="contact-row-body">
+                    <div className="contact-row-label">LeetCode</div>
+                    <a className="contact-row-value" href={LEETCODE} target="_blank" rel="noreferrer">
+                      leetcode.com/u/marufHtuhin
+                    </a>
+                  </div>
+                  <a className="contact-row-btn" href={LEETCODE} target="_blank" rel="noreferrer">
+                    Open <ArrowIcon />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -733,6 +1173,15 @@ export default function App() {
           <div className="copyright">© 2026 Md. Maruf Hasan Tuhin</div>
         </div>
       </footer>
+
+      <button
+        className={`to-top${showTop ? ' show' : ''}`}
+        type="button"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to top"
+      >
+        <UpIcon />
+      </button>
     </>
   );
 }
