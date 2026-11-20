@@ -31,15 +31,15 @@
   --bg: #0f1830;
   --bg-soft: #13203c;
   --ink: #f4f7e8;
-  --body: #c6cfb4;
+  --body: #d9e0c6;
   --card: #1a2848;
   --accent: #9db6ff;
   --hand: #9db6ff;
   --highlight: #54553d;
   --tape: #d5c758;
   --dot: rgba(234, 239, 222, 0.12);
-  --hairline: rgba(234, 239, 222, 0.38);
-  --hairline-soft: rgba(234, 239, 222, 0.18);
+  --hairline: rgba(234, 239, 222, 0.55);
+  --hairline-soft: rgba(234, 239, 222, 0.3);
   --now: #f26d6d;
   --btn-bg: #f4f7e8;
   --btn-text: #0f1830;
@@ -487,7 +487,7 @@ a {
 /* ---------- sections ---------- */
 
 .section {
-  padding: 120px 0;
+  padding: 84px 0;
   scroll-margin-top: 110px;
 }
 
@@ -496,7 +496,7 @@ a {
   justify-content: space-between;
   align-items: flex-start;
   gap: 32px;
-  margin-bottom: 56px;
+  margin-bottom: 44px;
 }
 
 .section-head h2 {
@@ -622,7 +622,7 @@ a {
   grid-area: date;
   font-family: "JetBrains Mono", monospace;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--body);
   padding-top: 5px;
@@ -734,13 +734,41 @@ a {
   position: absolute;
   top: 18px;
   right: 22px;
+  z-index: 2;
   font-family: "Caveat", cursive;
   font-size: 24px;
   font-weight: 700;
   color: var(--hand);
+  background: var(--card);
+  padding: 2px 12px 4px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px var(--shadow);
   transform: rotate(4deg);
   line-height: 1.1;
   white-space: nowrap;
+}
+
+/* project screenshot — pinned-photo look, links to the live site / repo */
+.proj-shot-link {
+  display: block;
+  border: 1.5px solid var(--hairline-soft);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  background: var(--bg-soft);
+}
+
+.proj-shot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center 25%;
+  transition: transform 0.25s ease;
+}
+
+.proj-shot-link:hover .proj-shot {
+  transform: scale(1.02);
 }
 
 .red-dot {
@@ -756,7 +784,6 @@ a {
 .proj-card h3 {
   font-size: 30px;
   margin-bottom: 12px;
-  padding-right: 96px;
   line-height: 1.1;
 }
 
@@ -805,6 +832,13 @@ a {
   background: transparent;
 }
 
+/* dark mode: pills were dim grey on dark cards — brighten text + border */
+[data-theme="dark"] .pill {
+  color: #e6ebd6;
+  border-color: rgba(234, 239, 222, 0.45);
+  background: rgba(244, 247, 232, 0.05);
+}
+
 .proj-links {
   display: flex;
   gap: 10px 24px;
@@ -816,7 +850,7 @@ a {
 .band {
   background: var(--band);
   color: #fff;
-  padding: 110px 0;
+  padding: 96px 0;
   scroll-margin-top: 110px;
 }
 
@@ -959,6 +993,8 @@ a {
   text-decoration: none;
   font-size: 15px;
   overflow-wrap: anywhere;
+  display: inline-block;
+  padding: 4px 0; /* larger tap target on touch screens */
 }
 
 .contact-cell a:hover {
@@ -1053,7 +1089,7 @@ a {
   }
 
   .section {
-    padding: 88px 0;
+    padding: 64px 0;
   }
 
   .contact-grid {
@@ -1162,11 +1198,10 @@ a {
 
   .proj-card h3 {
     font-size: 27px;
-    padding-right: 84px;
   }
 
   .band {
-    padding: 80px 0;
+    padding: 72px 0;
   }
 
   .repo-name {
@@ -1180,7 +1215,7 @@ a {
   }
 
   .section {
-    padding: 72px 0;
+    padding: 56px 0;
   }
 }
 
