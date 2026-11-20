@@ -68,7 +68,7 @@ const FARM_MARKET: Project = {
 const AMADER_KRISHI: Project = {
   title: 'AmaderKrishi AI',
   shot: '/shots/amaderkrishi.jpg',
-  shotAlt: 'AmaderKrishi AI — FastAPI, MySQL and Gemini project tile',
+  shotAlt: 'AmaderKrishi AI — crop disease diagnosis: a papaya plant photo with a detailed Bangla answer from Gemini',
   desc: 'Bengali agriculture assistant — chat with Gemini in Bangla, photograph a crop to check for disease, and hear answers spoken aloud. My SDP-II project.',
   stack: ['FastAPI', 'MySQL', 'Google Gemini', 'Web Speech API'],
   repo: 'https://github.com/marufHtuhin/AmaderKrishi_AI',
@@ -77,9 +77,9 @@ const AMADER_KRISHI: Project = {
 const ECOMMERCE: Project = {
   title: 'E-commerce Sales & Inventory System',
   shot: '/shots/ecommerce.jpg',
-  shotAlt: 'E-commerce Sales and Inventory System — FastAPI, SQLAlchemy and SQLite project tile',
+  shotAlt: 'E-commerce POS landing page — Elevate Your Sales Game with Our Powerful POS Application',
   desc: 'Full-stack point-of-sale and inventory system: JWT auth, product and stock CRUD, sales and invoices with automatic stock deduction, VAT and discounts, dashboard stats, and printable invoices. Built for a database course.',
-  stack: ['FastAPI', 'SQLAlchemy', 'MySQL', 'JWT'],
+  stack: ['FastAPI', 'SQLAlchemy', 'MySQL', 'SQLite', 'JWT'],
   repo: 'https://github.com/marufHtuhin/Ecommerce-Sales-Inventory-System',
 };
 
