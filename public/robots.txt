@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://marufhtuhin.vercel.app/sitemap.xml
