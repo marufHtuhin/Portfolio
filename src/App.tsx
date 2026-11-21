@@ -894,7 +894,6 @@ export default function App() {
                 all on GitHub
               </span>
             </div>
-            {featuredVisible && <FeaturedCard project={FARM_MARKET} />}
             <div className="filter-row" role="group" aria-label="Filter projects">
               {FILTERS.map((f) => (
                 <button
@@ -908,6 +907,7 @@ export default function App() {
                 </button>
               ))}
             </div>
+            {featuredVisible && <FeaturedCard project={FARM_MARKET} />}
             <div className="flip-grid">
               {visibleFlip.map((p) => (
                 <FlipCard key={p.title} project={p} />
