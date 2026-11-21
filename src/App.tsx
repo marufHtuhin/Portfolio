@@ -112,10 +112,10 @@ const SNAKE: Project = {
   category: 'Game · AI',
   short: 'Classic snake with an A* pathfinding brain — watch the AI play, or play yourself.',
   built: ['A* pathfinding autopilot', 'Manual play — keyboard + touch', 'Runs in the browser via pygbag'],
-  ai: false,
+  ai: true,
 };
 
-/* Featured card (always visible) + flip-card grid below the filters. */
+/* Featured card (shown when it matches the active filter) + flip-card grid below the filters. Counts include the featured card, so they match the projects actually visible. */
 const FLIP_PROJECTS = [AMADER_KRISHI, ECOMMERCE, SNAKE];
 const ALL_PROJECTS = [FARM_MARKET, ...FLIP_PROJECTS];
 
@@ -193,8 +193,8 @@ const JOURNEY = [
 const CORE_STACK = ['Python', 'FastAPI', 'Django', 'MySQL', 'PostgreSQL', 'React', 'Docker'];
 
 const SKILL_GROUPS = [
-  { title: 'Backend', glyph: 'BE', items: ['FastAPI', 'Django', 'REST APIs', 'JWT auth'] },
-  { title: 'Languages', glyph: 'PY', items: ['Python', 'TypeScript', 'JavaScript', 'SQL', 'C++'] },
+  { title: 'Backend', glyph: 'BE', items: ['FastAPI', 'Django', 'DRF', 'REST APIs', 'JWT auth'] },
+  { title: 'Languages', glyph: 'PY', items: ['Python', 'TypeScript', 'JavaScript', 'SQL', 'C++', 'Java'] },
   { title: 'Data', glyph: 'DB', items: ['MySQL', 'PostgreSQL', 'SQLite', 'SQLAlchemy', 'Alembic'] },
   { title: 'AI & ML', glyph: 'AI', items: ['Google Gemini', 'scikit-learn', 'RAG-lite', 'Open-Meteo'] },
   { title: 'Tools', glyph: 'TL', items: ['Git & GitHub', 'Docker', 'Postman', 'pytest', 'Vitest'] },
@@ -216,8 +216,8 @@ const EXPERIENCE = [
   {
     dates: 'Nov 2026',
     title: 'Snake Game AI',
-    org: 'Personal project',
-    label: 'Personal project',
+    org: 'AI course · BUBT',
+    label: 'Course project',
     bullets: [
       'A* pathfinding AI that plays snake by itself',
       'Python + Pygame, playable in the browser via pygbag',
@@ -399,12 +399,14 @@ function UpIcon() {
 
 /* ---------- typewriter ---------- */
 
-/* Types each phrase char by char, pauses, deletes, loops forever. */
+/* Types each phrase char by char, pauses, deletes, loops forever.
+   The line is never left blank: it starts with the first character already
+   shown, and the next phrase begins the moment the old one is deleted. */
 function useTypewriter(phrases: string[]) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState(phrases[0].slice(0, 1));
   useEffect(() => {
     let phrase = 0;
-    let char = 0;
+    let char = 1;
     let deleting = false;
     let timer = 0;
     const tick = () => {
@@ -420,13 +422,16 @@ function useTypewriter(phrases: string[]) {
         timer = window.setTimeout(tick, 70);
       } else {
         char -= 1;
-        setText(current.slice(0, char));
         if (char === 0) {
+          /* Deleted fully — start the next phrase at once, no empty pause. */
           deleting = false;
           phrase = (phrase + 1) % phrases.length;
-          timer = window.setTimeout(tick, 350);
+          char = 1;
+          setText(phrases[phrase].slice(0, 1));
+          timer = window.setTimeout(tick, 70);
           return;
         }
+        setText(current.slice(0, char));
         timer = window.setTimeout(tick, 35);
       }
     };
@@ -679,6 +684,13 @@ export default function App() {
     return true;
   });
 
+  /* The featured card follows the same filter, so the pill counts (which
+     include it) always match the projects actually on screen. */
+  const featuredVisible =
+    filter === 'all' ||
+    (filter === 'live' && Boolean(FARM_MARKET.live)) ||
+    (filter === 'ai' && Boolean(FARM_MARKET.ai));
+
   return (
     <>
       <div className="progress" style={{ width: `${progress}%` }} aria-hidden="true" />
@@ -882,7 +894,7 @@ export default function App() {
                 all on GitHub
               </span>
             </div>
-            <FeaturedCard project={FARM_MARKET} />
+            {featuredVisible && <FeaturedCard project={FARM_MARKET} />}
             <div className="filter-row" role="group" aria-label="Filter projects">
               {FILTERS.map((f) => (
                 <button
@@ -1034,7 +1046,7 @@ export default function App() {
           <div className="wrap">
             <div className="section-head reveal">
               <div>
-                <div className="eyebrow">5 public repos</div>
+                <div className="eyebrow">10+ public repos</div>
                 <h2>Code in the open.</h2>
               </div>
               <span className="section-note">
