@@ -115,8 +115,33 @@ const SNAKE: Project = {
   ai: true,
 };
 
+const PULSEWATCH: Project = {
+  title: 'PulseWatch AI',
+  annotation: 'live',
+  liveDot: true,
+  shot: '/shots/pulsewatch.png',
+  shotAlt: 'PulseWatch AI — FarmMarket monitor: Up, 113 ms response, P95 latency and response-time chart',
+  desc: 'API monitoring that explains itself — real HTTP checks, a deterministic anomaly engine, and AI incident explanations, with Telegram alerts when something breaks. Multi-user SaaS: open registration, per-user monitors and settings, forgot-password OTP, and an admin panel.',
+  feats: [
+    'Anomaly detection — latency, errors, timeouts, baseline drift, SSL expiry',
+    'AI incident explanations via OpenRouter — verified live on a real alert',
+    'Telegram alerts + P50/P95/P99 latency + consecutive-failure detection',
+  ],
+  stack: ['React', 'JavaScript', 'FastAPI', 'MySQL · TiDB Cloud', 'OpenRouter', 'Telegram Bot API'],
+  live: 'https://pulsewatchai.vercel.app',
+  repo: 'https://github.com/marufHtuhin/PulseWatch-AI',
+  category: 'SaaS · Monitoring',
+  short: 'API monitoring with AI incident explanations and Telegram alerts.',
+  built: [
+    'Real HTTP checks + 11-rule anomaly engine',
+    'AI incident explanations via OpenRouter',
+    'Telegram alerts, SSL expiry, admin panel',
+  ],
+  ai: true,
+};
+
 /* Featured card (shown when it matches the active filter) + flip-card grid below the filters. Counts include the featured card, so they match the projects actually visible. */
-const FLIP_PROJECTS = [AMADER_KRISHI, ECOMMERCE, SNAKE];
+const FLIP_PROJECTS = [PULSEWATCH, AMADER_KRISHI, ECOMMERCE, SNAKE];
 const ALL_PROJECTS = [FARM_MARKET, ...FLIP_PROJECTS];
 
 type Filter = 'all' | 'live' | 'ai';
@@ -132,6 +157,11 @@ const REPOS = [
     name: 'FarmMarket',
     desc: 'Fair-price agricultural marketplace for Bangladesh.',
     url: 'https://github.com/marufHtuhin/FarmMarket',
+  },
+  {
+    name: 'PulseWatch-AI',
+    desc: 'API monitoring with anomaly detection, AI explanations and Telegram alerts.',
+    url: 'https://github.com/marufHtuhin/PulseWatch-AI',
   },
   {
     name: 'AmaderKrishi_AI',
@@ -211,6 +241,16 @@ const EXPERIENCE = [
     bullets: [
       'Bilingual fair-price marketplace — React + TypeScript frontend, FastAPI + MySQL/TiDB backend',
       'Smart demand matching, 8-week price forecasting, Gemini-powered Krishi Bondhu assistant',
+    ],
+  },
+  {
+    dates: 'Nov 2026',
+    title: 'PulseWatch AI',
+    org: 'Personal project',
+    label: 'SaaS',
+    bullets: [
+      'API monitoring that explains itself — real HTTP checks, anomaly engine, AI incident explanations',
+      'Multi-user SaaS: JWT auth, Telegram alerts, admin panel — live on Render + Vercel',
     ],
   },
   {
@@ -497,9 +537,6 @@ function FeaturedCard({ project }: { project: Project }) {
 
 function FlipCard({ project }: { project: Project }) {
   const [flipped, setFlipped] = useState(false);
-  const link = project.live ?? project.repo;
-  const linkLabel = project.live ? 'Live site' : 'Repo';
-
   /* Clicks on links inside the card navigate instead of flipping. */
   const flipOnClick = (e: ReactMouseEvent<HTMLElement>) => {
     if ((e.target as HTMLElement).closest('a')) return;
@@ -544,9 +581,16 @@ function FlipCard({ project }: { project: Project }) {
             </div>
             <div className="flip-foot">
               <span>Click for details</span>
-              <a className="text-link" href={link} target="_blank" rel="noreferrer">
-                {linkLabel} <ArrowIcon />
-              </a>
+              <span className="flip-links">
+                {project.live && (
+                  <a className="text-link" href={project.live} target="_blank" rel="noreferrer">
+                    Live site <ArrowIcon />
+                  </a>
+                )}
+                <a className="text-link" href={project.repo} target="_blank" rel="noreferrer">
+                  Repo <ArrowIcon />
+                </a>
+              </span>
             </div>
           </div>
         </div>
@@ -565,10 +609,17 @@ function FlipCard({ project }: { project: Project }) {
               ))}
             </ul>
             <div className="flip-foot">
-              <span>Click to flip back</span>
-              <a className="btn flip-btn" href={link} target="_blank" rel="noreferrer">
-                {linkLabel} <ArrowIcon />
-              </a>
+              <span>Flip back</span>
+              <span className="flip-links">
+                {project.live && (
+                  <a className="btn flip-btn" href={project.live} target="_blank" rel="noreferrer">
+                    Live site <ArrowIcon />
+                  </a>
+                )}
+                <a className="text-link" href={project.repo} target="_blank" rel="noreferrer">
+                  Repo <ArrowIcon />
+                </a>
+              </span>
             </div>
           </div>
         </div>
@@ -883,13 +934,13 @@ export default function App() {
           <div className="wrap">
             <div className="section-head reveal">
               <div>
-                <div className="eyebrow">4 selected</div>
+                <div className="eyebrow">5 selected</div>
                 <h2>
-                  Four projects. All real, all <span className="hl">runnable</span>.
+                  Five projects. All real, all <span className="hl">runnable</span>.
                 </h2>
               </div>
               <span className="section-note">
-                two live, four open source
+                three live, five open source
                 <br />
                 all on GitHub
               </span>

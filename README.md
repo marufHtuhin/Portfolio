@@ -8,6 +8,16 @@ open-source band. Light + dark themes (toggle, persisted), fully responsive.
 Built with **React + TypeScript + Vite** and plain custom CSS. Fully static — no
 backend, no environment variables.
 
+## Projects
+
+| Project | Live | Repo |
+|---|---|---|
+| FarmMarket — fair-price agricultural marketplace | [Live](https://farmmarket-gdcm.onrender.com) | [Repo](https://github.com/marufHtuhin/FarmMarket) |
+| PulseWatch AI — API monitoring with AI incident explanations | [Live](https://pulsewatchai.vercel.app) | [Repo](https://github.com/marufHtuhin/PulseWatch-AI) |
+| AmaderKrishi AI — Bengali agriculture assistant | — | [Repo](https://github.com/marufHtuhin/AmaderKrishi_AI) |
+| E-commerce Sales & Inventory System — POS + inventory | — | [Repo](https://github.com/marufHtuhin/Ecommerce-Sales-Inventory-System) |
+| Snake Game AI — A* pathfinding snake | [Live](https://marufhtuhin.github.io/Snake-Game-AI/) | [Repo](https://github.com/marufHtuhin/Snake-Game-AI) |
+
 ## Run locally
 
 ```bash
