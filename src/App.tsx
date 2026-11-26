@@ -115,8 +115,45 @@ const SNAKE: Project = {
   ai: true,
 };
 
+const PULSEWATCH: Project = {
+  title: 'PulseWatch AI',
+  annotation: 'live',
+  liveDot: true,
+  shot: '/shots/pulsewatch.png',
+  shotAlt: 'PulseWatch AI — FarmMarket monitor detail: 100% uptime, P95 latency and check history',
+  desc: 'API monitoring that explains itself — real HTTP checks, a deterministic anomaly engine, and AI incident explanations, with Telegram alerts when something breaks. Multi-user SaaS: open registration, per-user monitors and settings, forgot-password OTP, and an admin panel.',
+  feats: [
+    'Anomaly detection — latency, errors, timeouts, baseline drift, SSL expiry',
+    'AI incident explanations via OpenRouter — verified live on a real alert',
+    'Telegram alerts + P50/P95/P99 latency + consecutive-failure detection',
+  ],
+  stack: [
+    'React',
+    'JavaScript',
+    'Vite',
+    'FastAPI',
+    'SQLAlchemy',
+    'MySQL · TiDB Cloud',
+    'JWT',
+    'OpenRouter',
+    'Telegram Bot API',
+    'APScheduler',
+    'Render',
+  ],
+  live: 'https://pulsewatchai.vercel.app',
+  repo: 'https://github.com/marufHtuhin/PulseWatch-AI',
+  category: 'SaaS · Monitoring',
+  short: 'API monitoring with AI incident explanations and Telegram alerts.',
+  built: [
+    'Real HTTP checks + 11-rule anomaly engine',
+    'AI incident explanations via OpenRouter',
+    'Telegram alerts, SSL expiry, admin panel',
+  ],
+  ai: true,
+};
+
 /* Featured card (shown when it matches the active filter) + flip-card grid below the filters. Counts include the featured card, so they match the projects actually visible. */
-const FLIP_PROJECTS = [AMADER_KRISHI, ECOMMERCE, SNAKE];
+const FLIP_PROJECTS = [PULSEWATCH, AMADER_KRISHI, ECOMMERCE, SNAKE];
 const ALL_PROJECTS = [FARM_MARKET, ...FLIP_PROJECTS];
 
 type Filter = 'all' | 'live' | 'ai';
@@ -132,6 +169,11 @@ const REPOS = [
     name: 'FarmMarket',
     desc: 'Fair-price agricultural marketplace for Bangladesh.',
     url: 'https://github.com/marufHtuhin/FarmMarket',
+  },
+  {
+    name: 'PulseWatch-AI',
+    desc: 'API monitoring with anomaly detection, AI explanations and Telegram alerts.',
+    url: 'https://github.com/marufHtuhin/PulseWatch-AI',
   },
   {
     name: 'AmaderKrishi_AI',
@@ -883,13 +925,13 @@ export default function App() {
           <div className="wrap">
             <div className="section-head reveal">
               <div>
-                <div className="eyebrow">4 selected</div>
+                <div className="eyebrow">5 selected</div>
                 <h2>
-                  Four projects. All real, all <span className="hl">runnable</span>.
+                  Five projects. All real, all <span className="hl">runnable</span>.
                 </h2>
               </div>
               <span className="section-note">
-                two live, four open source
+                three live, five open source
                 <br />
                 all on GitHub
               </span>
