@@ -863,7 +863,7 @@ export default function App() {
                 </p>
                 <div className="about-stats">
                   <div className="about-stat">
-                    <b>4</b>
+                    <b>5</b>
                     <span>Projects built</span>
                   </div>
                   <div className="about-stat">
